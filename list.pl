@@ -20,8 +20,8 @@ diff([X|Xs], [X|Ys], Z) :- diff(Xs, Ys, Z).
 diff([X|Xs], [Y|Ys], [X|Zs]) :- X<Y, diff(Xs, [Y|Ys], Zs).
 diff([X|Xs], [Y|Ys], Z) :- Y<X, diff([X|Xs], Ys, Z).
 
-% select(L1, X, L2) is true if X is a member of L1, diff(L1, [X], L2)
-select(L1, X, L2) :- member(X, L1), diff(L1, [X], L2).
+select([H|T], H, T). % selecting from head
+select([H|T], X, [H|L]) :- select(T, X, L). % selecting from tail 
 
 permute([], []).
 permute(L, [H|T]) :- select(L, H, X), permute(X, T).
