@@ -1,14 +1,3 @@
-% a single Val is a binary tree.
-% Val has one child, which is the Val of a binary tree.
-% Val has two children. Each child is the Val of a binary tree.
-
-n(3, 2, 5).
-n(2, 4, null).
-n(5, 7, null).
-n(4, null, null).
-n(7, null, null).
-val(n(Val, _, _), Val).
-
 % null is a binary  tree
 % a single Val is a binary tree.
 % Val has one child, which is the Val of a binary tree.
@@ -17,7 +6,8 @@ binaryTree(null).
 binaryTree(n(_, L, R)) :- binaryTree(L), binaryTree(R).
 
 find(n(Val, _, _), Val).
-find(n(Val, L, R), X) :- not(X = Val), (find(L, X); find(R, X)).
+find(n(Val, L, R), X) :- X < Val, find(L, X).
+find(n(Val, L, R), X) :- X > Val, find(R, X).
 
 % root, L, R
 preorder(n(Val, null, null), [Val]).
