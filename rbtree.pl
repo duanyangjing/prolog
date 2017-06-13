@@ -29,3 +29,28 @@ rbtree_insert(n(Val, Color, L, R), X, T) :-
 insert(e, X, n(X, blk, e, e)).
 insert(n(Val, Color, L, R), X, n(A, blk, C, D)) :- 
 	rbtree_insert(n(Val, Color, L, R), X, n(A, _, C, D)).
+
+
+rbt_min(n(Val, null, null), Val).
+rbt_min(n(_, L, _), X) :- rbt_min(L, X).
+
+% delete leaf or node with less <= 1 children, result is always black.
+%
+% double black null
+delete(n(i, _, e, e), i, n(null, bb, e, e)).
+% if i is red, then child must be black, result is black.
+% if i is black, since one child is null, the other child must be red, result is black.
+% so no matter i's color, result is always black.
+delete(n(i, _, n(li, _, e, e), e), i, n(li, blk, e, e)).
+delete(n(i, _, e, n(ri, _, e, e)), i, n(ri, blk, e, e)).
+
+% delete node with with 2 non-null children, replace with inorder succ,
+% and delete inorder succ from right subtree. Need to fix inbalance!
+delete(n(i, color, L, R), i, T) :- 
+	rbt_min(R, X), delete(R, X, Rx), fix(n(X, color, L, Rx), T).
+
+fix(n(X, bb, L, R), n(X, b, L, R)).
+fix(n())
+
+
+
