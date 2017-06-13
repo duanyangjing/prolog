@@ -34,23 +34,47 @@ insert(n(Val, Color, L, R), X, n(A, blk, C, D)) :-
 rbt_min(n(Val, null, null), Val).
 rbt_min(n(_, L, _), X) :- rbt_min(L, X).
 
-% delete leaf or node with less <= 1 children, result is always black.
+% del leaf or node with less <= 1 children, result is always black.
 %
 % double black null
-delete(n(i, _, e, e), i, n(null, bb, e, e)).
-% if i is red, then child must be black, result is black.
-% if i is black, since one child is null, the other child must be red, result is black.
-% so no matter i's color, result is always black.
-delete(n(i, _, n(li, _, e, e), e), i, n(li, blk, e, e)).
-delete(n(i, _, e, n(ri, _, e, e)), i, n(ri, blk, e, e)).
+del_root(n(Val, _, e, e), Val, e).
 
-% delete node with with 2 non-null children, replace with inorder succ,
-% and delete inorder succ from right subtree. Need to fix inbalance!
-delete(n(i, color, L, R), i, T) :- 
-	rbt_min(R, X), delete(R, X, Rx), fix(n(X, color, L, Rx), T).
+% if Val is red, then child must be black, result is black.
+% if Val is black, since one child is null, the other child must be red, result is black.
+% so no matter Val's color, result is always black.
+del_root(n(Val, _, n(li, _, e, e), e), Val, n(li, blk, e, e)).
+del_root(n(Val, _, e, n(ri, _, e, e)), Val, n(ri, blk, e, e)).
 
-fix(n(X, bb, L, R), n(X, b, L, R)).
-fix(n())
+% del node with with 2 non-null children, replace with inorder succ,
+% and del inorder succ from right subtree. Need to fix inbalance!
+del_root(n(Val, Color, L, R), Val, T) :- 
+	rbt_min(R, X), del_root(R, X, Rx), fix(n(X, Color, L, Rx), T).
 
+black(e).
+black(n(Val, blk, L, R)).
+% fix(n(X, bb, L, R), n(X, b, L, R)).
+% case 1 CLRS P329, A,C,E could be null, as long as colored black
+fix(n(B, blk, A, n(D, red, C, E)), n(D, blk, n(B, red, A, C), E)) :- 
+	black(A), black(C), black(E),!.
 
+% case 2 CLRS P329, A,C,E could be null, as long as colored black
+fix(n(B, _, A, n(D, blk, C, E)), n(B, blk, A, n(D, red, C, E))) :- 
+	black(A), black(C), black(E),!.
 
+% case 3 CLRS P329, A,E could be null
+fix(n(B, Color, A, n(D, blk, n(C, red, CL, CR), E)),
+	n(C, Color, n(B, blk, A, CL), n(D, blk, CR, E))) :- 
+	black(A), black(E),!.
+
+% case 4 CLRS P329, A,C could be null, C color doesn't matter
+fix(n(B, Color, A, n(D, blk, C, n(E, red, EL, ER))),
+	n(D, Color, n(B, blk, A, C), n(E, blk, EL, ER))) :- black(A),!.
+fix(T, T).
+
+% general delete
+delete(n(Val, Color, L, R), Val, T) :-
+	del_root(n(Val, Color, L, R), Val, T).
+delete(n(Val, Color, L, R), X, T) :- 
+	X < Val, delete(L, X, Lx), fix(n(Val, Color, Lx, R), T).
+delete(n(Val, Color, L, R), X, T) :-
+	X > Val, delete(R, X, Rx), fix(n(Val, Color, L, Rx), T).
