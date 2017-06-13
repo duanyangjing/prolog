@@ -61,3 +61,13 @@ listlen([_|T], N) :- listlen(T, N1), N is N1 + 1.
 acclen([], A, A).
 acclen([_|T], A, N) :- A1 is A + 1, acclen(T, A1, N).
 betterlen(L, N) :- acclen(L, 0, N).
+
+subset_sum(X, [X|_], [X]).
+subset_sum(X, [H|T], [H|T1]) :- X1 is X-H, subset_sum(X1, T, T1).
+
+% head same as Sum, head as a list
+subset_sum(Sum, [Sum|_], [Sum]). 
+% use head to build result
+subset_sum(Sum, [H|T], [H|L]) :- NSum is Sum-H, subset_sum(NSum, T, L).
+% doesn't use head to build result
+subset_sum(Sum, [H|T], L) :- subset_sum(Sum, T, L).
