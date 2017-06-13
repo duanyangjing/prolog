@@ -48,10 +48,10 @@ del_root(n(Val, _, e, n(ri, _, e, e)), Val, n(ri, blk, e, e)).
 % del node with with 2 non-null children, replace with inorder succ,
 % and del inorder succ from right subtree. Need to fix inbalance!
 del_root(n(Val, Color, L, R), Val, T) :- 
-	rbt_min(R, X), del_root(R, X, Rx), fix(n(X, Color, L, Rx), T).
+	rbt_min(R, X), delete(R, X, Rx), fix(n(X, Color, L, Rx), T).
 
 black(e).
-black(n(Val, blk, L, R)).
+black(n(_, blk, _, _)).
 % fix(n(X, bb, L, R), n(X, b, L, R)).
 % case 1 CLRS P329, A,C,E could be null, as long as colored black
 fix(n(B, blk, A, n(D, red, C, E)), n(D, blk, n(B, red, A, C), E)) :- 
