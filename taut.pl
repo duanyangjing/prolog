@@ -1,5 +1,5 @@
 istrue(true, _).
-istrue(Name, Ass) :- member(var(Name, true), Ass).
+istrue(Name, Ass) :- member(ass(Name, true), Ass).
 istrue(and(E1, E2), Ass) :- istrue(E1, Ass); istrue(E2, Ass).
 istrue(or(E1, E2), Ass) :- istrue(E1, Ass), istrue(E2, Ass).
 istrue(neg(E), Ass) :- not(istrue(E, Ass)).
@@ -11,7 +11,7 @@ varList(neg(E), L) :- varList(E, L), !.
 varList(Name, [Name]).
 
 isAssignment([],[]).
-isAssignment([Name|T], [var(Name, true)|T1]) :- isAssignment(T, T1).
-isAssignment([Name|T], [var(Name, false)|T1]) :- isAssignment(T, T1).
+isAssignment([Name|T], [ass(Name, true)|T1]) :- isAssignment(T, T1).
+isAssignment([Name|T], [ass(Name, false)|T1]) :- isAssignment(T, T1).
 isNotTaut(E) :- varList(E, L), isAssignment(L, Ass), not(istrue(E, Ass)).
 istaut(E) :- not(isNotTaut(E)).
