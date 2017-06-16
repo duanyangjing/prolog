@@ -53,20 +53,29 @@ elimXs(e(X, T), [e(Term1, Term2)|Tail], [e(Term1X, Term2X)|NTail]) :-
 
 %% equivalent transformation of equations to solvable form
 %
-trans([],[], _).
-% transformation a 
+trans([],[]).
+% transformation a: organize into form e(x, t) 
 % t = x where t is not a variable, and x is a variable, switch x and t.
-%  
-trans([e(Term1, Term2)|Tail], [e(Term2, Term1)|Tail2]) :- 
-	not(variable(Term1)), variable(Term2),
-	not(occurs(Term2, Term1)), 
-	elimXs(e(Term2, Term1), Tail, Tail1),
+trans([e(T, X)|Tail], [e(X, T)|Tail2]) :- 
+	not(variable(T)), variable(X),
+	not(occurs(X, T)), 
+	elimXs(e(X, T), Tail, Tail1),
 	trans(Tail1, Tail2).
 
-% transformation b
+% transformation b: erase e(x, x)
 % x = x where x is a variable, erase the euqation.
-trans([e(Term, Term)|Tail], NTail) :- 
-	variable(Term), trans(Tail, NTail).
+trans([e(X, X)|Tail], NTail) :- variable(X), trans(Tail, NTail).
 
-% transformation c
+% transformation c: term reduction
+% expand e(t1, t2)
+trans([e(compterm(f, L1), compterm(f, L2))|Tail], L) :-
+	args_to_equations(L1, L2, Es),
+	trans(Tail, NTail),
+	append(Es, NTail, L).
 
+% transformation d: variable elimination
+% X is a variable, not occurs in T, T neq X, apply variable elimination
+trans([e(X, T)|Tail], NTail) :-
+	variable(X),
+	not(occurs(X, T)),
+	elimXs(e(X, T), Tail, NTail). 
