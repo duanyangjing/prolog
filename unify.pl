@@ -8,6 +8,9 @@ variable(X) :- string(X).
 unify(Term1, Term2, U) :- 
 	trans([e(Term1, Term2)], U).
 
+%------------------------------------------------------------------------------%
+%%% relations used in trans() relation
+%
 % compterm args as a list * args list * equation list
 args_to_equations([], [], []).
 args_to_equations([H1|T1], [H2|T2], [e(H1, H2)|T]) :-
@@ -45,8 +48,8 @@ elimXs(e(X, T), [e(Term1, Term2)|Tail], [e(Term1X, Term2X)|NTail]) :-
 	elimX(e(X, T), Term2, Term2X),
 	elimXs(e(X, T), Tail, NTail).
 
-
-%% equivalent transformation of equations to solvable form
+%------------------------------------------------------------------------------%
+%%% equivalent transformation of equations to solvable form
 %
 trans([],[]).
 % transformation a: organize into form e(x, t) 
@@ -82,7 +85,7 @@ trans([e(X, T)|Tail], [e(X, T)|NTail]) :-
 
 
 
-
+%------------------------------------------------------------------------------%
 %%% Sample tests
 
 %%% simple tests
@@ -100,3 +103,7 @@ trans([e(X, T)|Tail], [e(X, T)|NTail]) :-
 
 %%% test unification consistency
 % unify(compterm(f, [1,2]), compterm(f, ["X","X"]), U).
+
+%%% test var sharing
+% unify(compterm(f, ["X","Y","Z"]), compterm(f, ["Y","Z",1]), U).
+% unify(compterm(f, ["X","Y"]), compterm(f, ["Y","X"]), U).
