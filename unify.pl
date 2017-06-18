@@ -64,7 +64,7 @@ trans([e(T, X)|Tail], [e(X, T)|Tail2]) :-
 % x = x where x is a variable, erase the euqation.
 % actually, not only when x is var, also should erase
 trans([e(X, X)|Tail], NTail) :- variable(X), trans(Tail, NTail).
-trans([e(X, X)|Tail], NTail) :- const(X), trans(Tail, NTail).
+trans([e(X, X)|Tail], NTail) :- const(X), trans(Tail, NTail), !.
 
 % transformation c: term reduction
 % expand e(t1, t2)
