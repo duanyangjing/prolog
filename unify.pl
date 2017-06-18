@@ -21,9 +21,10 @@ occurs_aux(X, [_|T]) :- occurs(X, T).
 occurs(X, compterm(_, L)):- occurs_aux(X, L). 
 
 % substitute variable X with T in a term
-elimX(e(X, T), X, T).
+% This term could be a var, compterm or constant, each is mutually exclusive
+elimX(e(X, T), X, T) :- !.
 elimX(e(X, T), compterm(F, L), compterm(F, NL)) :-
-	elimX_list(e(X, T), L, NL).
+	elimX_list(e(X, T), L, NL), !.
 elimX(e(X, T), Term, Term).
 
 % substitute variable X with T in a list of terms, can be used to handle
@@ -64,11 +65,10 @@ trans([e(X, X)|Tail], NTail) :- const(X), trans(Tail, NTail).
 
 % transformation c: term reduction
 % expand e(t1, t2)
-trans([e(compterm(f, L1), compterm(f, L2))|Tail], NL) :-
+trans([e(compterm(F, L1), compterm(F, L2))|Tail], NL) :-
 	args_to_equations(L1, L2, Es),
 	append(Es, Tail, L),
 	trans(L, NL).
-
 
 % transformation d: variable elimination
 % X is a variable, not occurs in T, T neq X, apply variable elimination
@@ -76,4 +76,27 @@ trans([e(compterm(f, L1), compterm(f, L2))|Tail], NL) :-
 trans([e(X, T)|Tail], [e(X, T)|NTail]) :-
 	variable(X),
 	not(occurs(X, T)),
-	elimXs(e(X, T), Tail, NTail). 
+	elimXs(e(X, T), Tail, Tail1),
+	trans(Tail1, NTail). 
+
+
+
+
+
+%%% Sample tests
+
+%%% simple tests
+% unify(1, 1, U).
+% unify(1, 2, U).
+% unify("X", 1, U).
+% unify(1, "X", U).
+% unify("X", "X", U).
+% unify("X", "Y", U).
+
+%%% compound term tests
+% unify(compterm(f, [1]), compterm(f, ["X"]), U).
+% unify(compterm(f, [compterm(g, [1])]), compterm(f, [compterm(g, ["X"])]), U).
+% unify(compterm(f, [compterm(h,[compterm(g, [1])])]), compterm(f, [compterm(h,[compterm(g, ["X"])])]), U).
+
+%%% test unification consistency
+% unify(compterm(f, [1,2]), compterm(f, ["X","X"]), U).
