@@ -5,14 +5,8 @@ const(X) :- string(X).
 const(X) :- number(X).
 variable(X) :- string(X).
 
-unify(X, X) :- const(X).
-unify(X, Y, [(Y, X)]) :- const(X), variable(Y).
-unify(X, compterm(F, L), [(X, compterm(F, L))]) :- 
-	variable(X), not(occurs(X, L)).
-
-unify(compterm(F, []), compterm(F, []), []).
-unify(compterm(F, Args1), compterm(F, Args2), U) :-
-	unify_args(Args1, Args2, U).
+unify(Term1, Term2, U) :- 
+	trans([e(Term1, Term2)], U).
 
 % compterm args as a list * args list * equation list
 args_to_equations([], [], []).
@@ -64,18 +58,22 @@ trans([e(T, X)|Tail], [e(X, T)|Tail2]) :-
 
 % transformation b: erase e(x, x)
 % x = x where x is a variable, erase the euqation.
+% actually, not only when x is var, also should erase
 trans([e(X, X)|Tail], NTail) :- variable(X), trans(Tail, NTail).
+trans([e(X, X)|Tail], NTail) :- const(X), trans(Tail, NTail).
 
 % transformation c: term reduction
 % expand e(t1, t2)
-trans([e(compterm(f, L1), compterm(f, L2))|Tail], L) :-
+trans([e(compterm(f, L1), compterm(f, L2))|Tail], NL) :-
 	args_to_equations(L1, L2, Es),
-	trans(Tail, NTail),
-	append(Es, NTail, L).
+	append(Es, Tail, L),
+	trans(L, NL).
+
 
 % transformation d: variable elimination
 % X is a variable, not occurs in T, T neq X, apply variable elimination
-trans([e(X, T)|Tail], NTail) :-
+% still need to keep the equation applied.
+trans([e(X, T)|Tail], [e(X, T)|NTail]) :-
 	variable(X),
 	not(occurs(X, T)),
 	elimXs(e(X, T), Tail, NTail). 
